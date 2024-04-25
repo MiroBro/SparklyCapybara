@@ -1,0 +1,21 @@
+﻿(bool successful, string intToText) IntToAscii(int number = 42)
+{
+	fix isNeg <= number < 0
+	isNeg ??? {-number => number}
+
+
+	char[] numberAsChars = new char[32]
+	free index = numberAsChars.Length
+
+	while(number.NumberOfDigits > 0)
+	{
+		remainder = number % 10 //if its the first time a variable is set it gets a color?
+		number /= 10;
+
+		numberAsChars[--index] = (char)('0' + remainder)
+	}
+
+	isNeg ??? { buffer[--index] => '-'}
+
+	(true, numberAsChars.ToString())
+}
