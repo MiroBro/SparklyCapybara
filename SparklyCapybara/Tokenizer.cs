@@ -1,55 +1,184 @@
-﻿using System;
+﻿using SparklyCapybara;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SparklyCapybara.TokenData;
 
-namespace SparklyLanguage
+namespace SparklyCapybara
 {
     internal class Tokenizer
     {
         public void Tokenize()
         {
-            string codeString = ReadInput();
+            List<string> words = ExtractWordsAndSpecialCharacters2(CodeReader.GetCodeText());
+            List<Token> tokens = TransformToTokens(words);
         }
 
-        private string ReadInput()
+        public static List<Token> TransformToTokens(List<string> items)
         {
-            String line;
-            StringBuilder sb = new StringBuilder();
+            List<Token> tokens = new List<Token>();
 
-            //Pass the file path and file name to the StreamReader constructor
-            StreamReader sr = new StreamReader("InputCode.txt");
-            //Read the first line of text
-            line = sr.ReadLine();
-            sb.AppendLine(line);
-            //Continue to read until you reach end of file
-            while (line != null)
+            foreach (string item in items)
             {
-                //write the line to console window
-                Console.WriteLine(line);
-                //Read the next line
-                line = sr.ReadLine();
-                sb.AppendLine(line);
+                TokenType type = MapStringToTokenType(item);
+                tokens.Add(new Token(type, item));
             }
-            //close the file
-            sr.Close();
-            Console.ReadLine();
 
-            return sb.ToString();
+            return tokens;
         }
 
-        private List<TokenData> TransformCodeStringToTokens(string codeString)
+        static List<string> ExtractWordsAndSpecialCharacters2(string input)
         {
-            var split = codeString.Split(" ");
+            List<string> items = new List<string>();
+            StringBuilder word = new StringBuilder();
+            HashSet<string> sequences = new HashSet<string> { "=>", "<=", "==", "!=", "&&", "||", "++", "--" };
 
-            foreach (var splitPart in split)
+            for (int i = 0; i < input.Length; i++)
             {
-                var a = splitPart.Split(".");
-                var b = splitPart.Split(".");
+                char c = input[i];
+
+                // Check for sequences
+                if (i < input.Length - 1)
+                {
+                    string nextTwoChars = input.Substring(i, 2);
+                    if (sequences.Contains(nextTwoChars))
+                    {
+                        if (word.Length > 0)
+                        {
+                            items.Add(word.ToString());
+                            word.Clear();
+                        }
+                        items.Add(nextTwoChars);
+                        i++; // Skip the next character
+                        continue;
+                    }
+                }
+
+                if (char.IsLetterOrDigit(c))
+                {
+                    word.Append(c);
+                }
+                else
+                {
+                    if (word.Length > 0)
+                    {
+                        items.Add(word.ToString());
+                        word.Clear();
+                    }
+                    if (!char.IsWhiteSpace(c) && !char.IsControl(c))
+                    {
+                        items.Add(c.ToString());
+                    }
+                }
             }
 
-            return null;
+            // Add the last word if there is one
+            if (word.Length > 0)
+            {
+                items.Add(word.ToString());
+            }
+
+            return items;
+        }
+
+        private static TokenType MapStringToTokenType(string word)
+        {
+            switch (word)
+            {
+                case "true":
+                case "false":
+                    return TokenType.Bool;
+
+                case "\"":
+                    return TokenType.QuotationMarks;
+
+                case "-":
+                    return TokenType.Subtract;
+
+                case "+":
+                    return TokenType.Plus;
+
+                case ";":
+                    return TokenType.SemiColon;
+
+                case "%":
+                    return TokenType.Percentage;
+
+                case ".":
+                    return TokenType.Dot;
+
+                case ",":
+                    return TokenType.Comma;
+
+                case "/":
+                    return TokenType.ForwardSlash;
+
+                case "?":
+                    return TokenType.QuestionMark;
+
+                case "(":
+                    return TokenType.RoundBracketLeft;
+
+                case ")":
+                    return TokenType.RoundBracketRight;
+
+                case "[":
+                    return TokenType.BoxBracketLeft;
+
+                case "]":
+                    return TokenType.BoxBracketRight;
+
+                case "{":
+                    return TokenType.CurlyBracketLeft;
+
+                case "}":
+                    return TokenType.CurlyBracketRight;
+
+                case "<":
+                    return TokenType.LessThan;
+
+                case ">":
+                    return TokenType.GreaterThan;
+
+                case "=":
+                    return TokenType.Equals;
+
+                case "==":
+                    return TokenType.DoubleEquals;
+
+                case "=>":
+                    return TokenType.ArrowLeft;
+
+                case "<=":
+                    return TokenType.ArrowLeft;
+
+                case "!=":
+                    return TokenType.NotEquals;
+
+                case "&&":
+                    return TokenType.And;
+
+                case "||":
+                    return TokenType.Or;
+
+                case "++":
+                    return TokenType.Increment;
+
+                case "--":
+                    return TokenType.Decrement;
+
+                default:
+                    if (int.TryParse(word, out _))
+                    {
+                        return TokenType.Number;
+                    }
+                    else
+                    {
+                        return TokenType.Variable;
+                    }
+            }
         }
     }
 }

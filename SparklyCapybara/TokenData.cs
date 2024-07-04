@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SparklyLanguage
+namespace SparklyCapybara
 {
     internal class TokenData
     {
-        public enum Token 
+        public enum TokenType
         {
             Bool,
             String,
@@ -26,7 +26,7 @@ namespace SparklyLanguage
             Plus,
             SemiColon,
             Percentage,
-            
+
             Dot,
             Comma,
 
@@ -44,7 +44,26 @@ namespace SparklyLanguage
             GreaterThan,
 
             Equals,
-            Variable,            
+            Variable,
+            DoubleEquals,
+            ArrowLeft,
+            NotEquals,
+            And,
+            Or,
+            Increment,
+            Decrement,
+        }
+
+        public class Token
+        {
+            public TokenType type;  
+            public string value;
+
+            public Token(TokenType type, string value)
+            {
+                this.type = type;
+                this.value = value;
+            }
         }
     }
 }

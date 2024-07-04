@@ -1,4 +1,4 @@
-﻿using SparklyLanguage;
+﻿using SparklyCapybara;
 
 class Program
 {
