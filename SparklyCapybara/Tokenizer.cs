@@ -12,28 +12,16 @@ namespace SparklyCapybara
     {
         public void Tokenize()
         {
-            List<string> words = ExtractWordsAndSpecialCharacters2(CodeReader.GetCodeText());
+            List<string> words = ExtractWordsAndSpecialCharacters(CodeReader.GetCodeText());
             List<Token> tokens = TransformToTokens(words);
         }
 
-        public static List<Token> TransformToTokens(List<string> items)
-        {
-            List<Token> tokens = new List<Token>();
-
-            foreach (string item in items)
-            {
-                TokenType type = MapStringToTokenType(item);
-                tokens.Add(new Token(type, item));
-            }
-
-            return tokens;
-        }
-
-        static List<string> ExtractWordsAndSpecialCharacters2(string input)
+        static List<string> ExtractWordsAndSpecialCharacters(string input)
         {
             List<string> items = new List<string>();
             StringBuilder word = new StringBuilder();
-            HashSet<string> sequences = new HashSet<string> { "=>", "<=", "==", "!=", "&&", "||", "++", "--" };
+            HashSet<string> sequences = new HashSet<string> { "=>", "<=", "==", "!=", "&&", "||", "++", "--", "->", "<-" };
+            HashSet<char> specialChars = new HashSet<char> { '#', '-', '+', '_', '=', '<', '>', '/' };
 
             for (int i = 0; i < input.Length; i++)
             {
@@ -45,18 +33,13 @@ namespace SparklyCapybara
                     string nextTwoChars = input.Substring(i, 2);
                     if (sequences.Contains(nextTwoChars))
                     {
-                        if (word.Length > 0)
-                        {
-                            items.Add(word.ToString());
-                            word.Clear();
-                        }
-                        items.Add(nextTwoChars);
+                        word.Append(nextTwoChars);
                         i++; // Skip the next character
                         continue;
                     }
                 }
 
-                if (char.IsLetterOrDigit(c))
+                if (char.IsLetterOrDigit(c) || specialChars.Contains(c))
                 {
                     word.Append(c);
                 }
@@ -83,13 +66,51 @@ namespace SparklyCapybara
             return items;
         }
 
+        public static List<Token> TransformToTokens(List<string> items)
+        {
+            List<Token> tokens = new List<Token>();
+
+            foreach (string item in items)
+            {
+                TokenType type = MapStringToTokenType(item);
+                tokens.Add(new Token(type, item));
+            }
+
+            return tokens;
+        }
+
         private static TokenType MapStringToTokenType(string word)
         {
             switch (word)
             {
                 case "true":
+                    return TokenType.True;
                 case "false":
+                    return TokenType.False;
+
+                case "bool":
                     return TokenType.Bool;
+
+                case "string":
+                    return TokenType.String;
+
+                case "int":
+                    return TokenType.Int;
+
+                case "char":
+                    return TokenType.Char;
+
+                case "while":
+                    return TokenType.While;
+
+                case "fix":
+                    return TokenType.Fix;
+
+                case "free":
+                    return TokenType.Free;
+
+                case "new":
+                    return TokenType.New;
 
                 case "\"":
                     return TokenType.QuotationMarks;
@@ -168,6 +189,12 @@ namespace SparklyCapybara
 
                 case "--":
                     return TokenType.Decrement;
+
+                case "->":
+                    return TokenType.ArrowRight;
+
+                case "<-":
+                    return TokenType.ArrowLeft;
 
                 default:
                     if (int.TryParse(word, out _))

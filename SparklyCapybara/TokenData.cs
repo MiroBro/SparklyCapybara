@@ -11,9 +11,13 @@ namespace SparklyCapybara
         public enum TokenType
         {
             Bool,
+            True,
+            False,
             String,
             Int,
             Char,
+            While,
+            New,
 
             Fix,
             Free,
@@ -52,6 +56,7 @@ namespace SparklyCapybara
             Or,
             Increment,
             Decrement,
+            ArrowRight,
         }
 
         public class Token
