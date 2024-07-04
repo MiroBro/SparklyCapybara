@@ -39,7 +39,7 @@ namespace SparklyCapybara
                     }
                 }
 
-                if (char.IsLetterOrDigit(c) || specialChars.Contains(c))
+                if (char.IsLetterOrDigit(c) || (WordStartsWithLetterOrDigit(word) && specialChars.Contains(c)))
                 {
                     word.Append(c);
                 }
@@ -64,6 +64,13 @@ namespace SparklyCapybara
             }
 
             return items;
+        }
+
+        private static bool WordStartsWithLetterOrDigit(StringBuilder word)
+        {
+            if (word.Length > 0)
+                return char.IsLetterOrDigit(word[0]);
+            return false;
         }
 
         public static List<Token> TransformToTokens(List<string> items)
