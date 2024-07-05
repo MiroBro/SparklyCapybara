@@ -1,6 +1,6 @@
 ## SparklyCapybara
 
-![alt text](https://github.com/MiroBro/SparklyCapybara/blob/main/Art/SparklyCapybaraLogo_Small.png)
+![alt text](https://github.com/MiroBro/SparklyCapybara/blob/main/Art/SparklyCapybaraLogo_Smaller.png)
 
 This is my SECOND compiler (and first language)! ✨
 
