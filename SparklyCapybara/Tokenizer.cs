@@ -1,218 +1,165 @@
 ﻿using SparklyCapybara;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using static TokenData;
 using System.Text;
-using System.Threading.Tasks;
-using static SparklyCapybara.TokenData;
 
-namespace SparklyCapybara
+internal class Tokenizer
 {
-    internal class Tokenizer
+    private string codeText;
+
+    public Tokenizer(string inputCode)
     {
-        public void Tokenize()
+        codeText = inputCode;
+    }
+
+    public List<Token> Tokenize()
+    {
+        // Use the codeText to extract tokens
+        List<string> words = ExtractWordsAndSpecialCharacters(codeText);
+        return TransformToTokens(words);
+    }
+
+    static List<string> ExtractWordsAndSpecialCharacters(string input)
+    {
+        List<string> items = new List<string>();
+        StringBuilder word = new StringBuilder();
+        HashSet<string> sequences = new HashSet<string> { "=>", "<=", "==", "!=", "&&", "||", "++", "--", "->", "???", "%=", "/=", "+=", "-=" };
+        HashSet<char> specialChars = new HashSet<char> { '#', '-', '+', '_', '=', '<', '>', '/', '%', '!', '?' };
+
+        for (int i = 0; i < input.Length; i++)
         {
-            List<string> words = ExtractWordsAndSpecialCharacters(CodeReader.GetCodeText());
-            List<Token> tokens = TransformToTokens(words);
+            char c = input[i];
+
+            // Check for sequences
+            if (i < input.Length - 1)
+            {
+                string nextTwoChars = input.Substring(i, 2);
+                if (sequences.Contains(nextTwoChars))
+                {
+                    word.Append(nextTwoChars);
+                    i++; // Skip the next character
+                    items.Add(word.ToString());
+                    word.Clear();
+                    continue;
+                }
+            }
+
+            if (i < input.Length - 2)
+            {
+                string nextThreeChars = input.Substring(i, 3);
+                if (sequences.Contains(nextThreeChars))
+                {
+                    word.Append(nextThreeChars);
+                    i += 2; // Skip the next two characters
+                    items.Add(word.ToString());
+                    word.Clear();
+                    continue;
+                }
+            }
+
+            if (char.IsLetterOrDigit(c) || (WordStartsWithLetterOrDigit(word) && specialChars.Contains(c)))
+            {
+                word.Append(c);
+            }
+            else
+            {
+                if (word.Length > 0)
+                {
+                    items.Add(word.ToString());
+                    word.Clear();
+                }
+                if (!char.IsWhiteSpace(c) && !char.IsControl(c))
+                {
+                    items.Add(c.ToString());
+                }
+            }
         }
 
-        static List<string> ExtractWordsAndSpecialCharacters(string input)
+        // Add the last word if there is one
+        if (word.Length > 0)
         {
-            List<string> items = new List<string>();
-            StringBuilder word = new StringBuilder();
-            HashSet<string> sequences = new HashSet<string> { "=>", "<=", "==", "!=", "&&", "||", "++", "--", "->", "<-" };
-            HashSet<char> specialChars = new HashSet<char> { '#', '-', '+', '_', '=', '<', '>', '/' };
+            items.Add(word.ToString());
+        }
 
-            for (int i = 0; i < input.Length; i++)
-            {
-                char c = input[i];
+        return items;
+    }
 
-                // Check for sequences
-                if (i < input.Length - 1)
+    private static bool WordStartsWithLetterOrDigit(StringBuilder word)
+    {
+        if (word.Length > 0)
+            return char.IsLetterOrDigit(word[0]);
+        return false;
+    }
+
+    public static List<Token> TransformToTokens(List<string> items)
+    {
+        List<Token> tokens = new List<Token>();
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            string currentItem = items[i];
+            TokenType tokenType = MapStringToTokenType(currentItem, tokens);
+
+            tokens.Add(new Token(tokenType, currentItem));
+        }
+
+        return tokens;
+    }
+
+    private static TokenType MapStringToTokenType(string item, List<Token> tokens)
+    {
+        switch (item)
+        {
+            case "true": return TokenType.True;
+            case "false": return TokenType.False;
+            case "bool": return TokenType.Bool;
+            case "string": return TokenType.String;
+            case "int": return TokenType.Int;
+            case "char": return TokenType.Char;
+            case "fix": return TokenType.Fix;
+            case "free": return TokenType.Free;
+            case "while": return TokenType.While;
+            case "new": return TokenType.New;
+
+            // Handle operators and symbols
+            case "+": return TokenType.Plus;
+            case "-": return TokenType.Subtract;
+            case "*": return TokenType.Multiply;
+            case "/": return TokenType.Divide;
+            case "%": return TokenType.Modulus;
+            case "++": return TokenType.Increment;
+            case "--": return TokenType.Decrement;
+            case "=>": return TokenType.ArrowRight;
+            case "->": return TokenType.ArrowLeft;
+            case "<=": return TokenType.LessThanOrEqual;
+            case ">=": return TokenType.GreaterThanOrEqual;
+            case "==": return TokenType.DoubleEquals;
+            case "!=": return TokenType.NotEquals;
+            case "=": return TokenType.Assign;
+            case "%=": return TokenType.ModAssign;
+            case "/=": return TokenType.DivideAssign;
+            case "+=": return TokenType.PlusAssign;
+            case "-=": return TokenType.MinusAssign;
+            case "???": return TokenType.QuestionMark;
+            case ";": return TokenType.Semicolon;
+            case ".": return TokenType.Dot;
+            case ",": return TokenType.Comma;
+            case "#": return TokenType.Hash;
+            case "(": return TokenType.RoundBracketLeft;
+            case ")": return TokenType.RoundBracketRight;
+            case "[": return TokenType.BoxBracketLeft;
+            case "]": return TokenType.BoxBracketRight;
+            case "{": return TokenType.CurlyBracketLeft;
+            case "}": return TokenType.CurlyBracketRight;
+
+            default:
+                if (int.TryParse(item, out _))
                 {
-                    string nextTwoChars = input.Substring(i, 2);
-                    if (sequences.Contains(nextTwoChars))
-                    {
-                        word.Append(nextTwoChars);
-                        i++; // Skip the next character
-                        continue;
-                    }
-                }
-
-                if (char.IsLetterOrDigit(c) || (WordStartsWithLetterOrDigit(word) && specialChars.Contains(c)))
-                {
-                    word.Append(c);
+                    return TokenType.Number;
                 }
                 else
                 {
-                    if (word.Length > 0)
-                    {
-                        items.Add(word.ToString());
-                        word.Clear();
-                    }
-                    if (!char.IsWhiteSpace(c) && !char.IsControl(c))
-                    {
-                        items.Add(c.ToString());
-                    }
+                    return TokenType.Variable;
                 }
-            }
-
-            // Add the last word if there is one
-            if (word.Length > 0)
-            {
-                items.Add(word.ToString());
-            }
-
-            return items;
-        }
-
-        private static bool WordStartsWithLetterOrDigit(StringBuilder word)
-        {
-            if (word.Length > 0)
-                return char.IsLetterOrDigit(word[0]);
-            return false;
-        }
-
-        public static List<Token> TransformToTokens(List<string> items)
-        {
-            List<Token> tokens = new List<Token>();
-
-            foreach (string item in items)
-            {
-                TokenType type = MapStringToTokenType(item);
-                tokens.Add(new Token(type, item));
-            }
-
-            return tokens;
-        }
-
-        private static TokenType MapStringToTokenType(string word)
-        {
-            switch (word)
-            {
-                case "true":
-                    return TokenType.True;
-                case "false":
-                    return TokenType.False;
-
-                case "bool":
-                    return TokenType.Bool;
-
-                case "string":
-                    return TokenType.String;
-
-                case "int":
-                    return TokenType.Int;
-
-                case "char":
-                    return TokenType.Char;
-
-                case "while":
-                    return TokenType.While;
-
-                case "fix":
-                    return TokenType.Fix;
-
-                case "free":
-                    return TokenType.Free;
-
-                case "new":
-                    return TokenType.New;
-
-                case "\"":
-                    return TokenType.QuotationMarks;
-
-                case "-":
-                    return TokenType.Subtract;
-
-                case "+":
-                    return TokenType.Plus;
-
-                case ";":
-                    return TokenType.SemiColon;
-
-                case "%":
-                    return TokenType.Percentage;
-
-                case ".":
-                    return TokenType.Dot;
-
-                case ",":
-                    return TokenType.Comma;
-
-                case "/":
-                    return TokenType.ForwardSlash;
-
-                case "?":
-                    return TokenType.QuestionMark;
-
-                case "(":
-                    return TokenType.RoundBracketLeft;
-
-                case ")":
-                    return TokenType.RoundBracketRight;
-
-                case "[":
-                    return TokenType.BoxBracketLeft;
-
-                case "]":
-                    return TokenType.BoxBracketRight;
-
-                case "{":
-                    return TokenType.CurlyBracketLeft;
-
-                case "}":
-                    return TokenType.CurlyBracketRight;
-
-                case "<":
-                    return TokenType.LessThan;
-
-                case ">":
-                    return TokenType.GreaterThan;
-
-                case "=":
-                    return TokenType.Equals;
-
-                case "==":
-                    return TokenType.DoubleEquals;
-
-                case "=>":
-                    return TokenType.ArrowLeft;
-
-                case "<=":
-                    return TokenType.ArrowLeft;
-
-                case "!=":
-                    return TokenType.NotEquals;
-
-                case "&&":
-                    return TokenType.And;
-
-                case "||":
-                    return TokenType.Or;
-
-                case "++":
-                    return TokenType.Increment;
-
-                case "--":
-                    return TokenType.Decrement;
-
-                case "->":
-                    return TokenType.ArrowRight;
-
-                case "<-":
-                    return TokenType.ArrowLeft;
-
-                default:
-                    if (int.TryParse(word, out _))
-                    {
-                        return TokenType.Number;
-                    }
-                    else
-                    {
-                        return TokenType.Variable;
-                    }
-            }
         }
     }
 }

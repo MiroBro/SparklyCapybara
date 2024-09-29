@@ -1,7 +1,4 @@
-﻿-number222
-number->ssss
-- number
-(bool success->#fullydonewoo, string intToText) IntToAscii(int number = 42)
+﻿(bool success->#fullydonewoo, string intToText) IntToAscii(int number = 42)
 {
 	fix isNeg <= number < 0
 	isNeg ??? {-number => number}

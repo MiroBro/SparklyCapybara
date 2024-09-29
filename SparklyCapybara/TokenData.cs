@@ -1,74 +1,84 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SparklyCapybara
+﻿public class TokenData
 {
-    internal class TokenData
+    public enum TokenType
     {
-        public enum TokenType
+        // Keywords
+        Bool,
+        String,
+        Int,
+        Char,
+        Fix,
+        Free,
+        While,
+        New,
+        True,
+        False,
+
+        // Operators
+        Plus,
+        Subtract,
+        Multiply,
+        Divide,
+        Modulus,
+        Increment,   // ++
+        Decrement,   // --
+        ArrowRight,  // =>
+        ArrowLeft,   // <-
+        QuestionMark, // ???
+        LessThan,
+        GreaterThan,
+        LessThanOrEqual,
+        GreaterThanOrEqual,
+        DoubleEquals, // ==
+        NotEquals,    // !=
+        Assign,       // =
+        ModAssign,    // %=
+        DivideAssign, // /=
+        PlusAssign,   // +=
+        MinusAssign,  // -=
+
+        // Symbols
+        Comma,
+        Semicolon,
+        Dot,
+        Colon,
+        Hash,          // #
+        ForwardSlash,
+        RoundBracketLeft,
+        RoundBracketRight,
+        BoxBracketLeft,
+        BoxBracketRight,
+        CurlyBracketLeft,
+        CurlyBracketRight,
+        QuotationMarks,
+
+        // Identifiers
+        Number,
+        Variable,
+
+        // Function return types
+        FunctionReturnType,
+        FunctionName,
+
+        // End of file
+        EOF,
+
+        // Additional operators
+        And,          // '&&'
+        Or,           // '||'
+        Assignment,   // '='
+        LogicalNot,   // '!'
+    }
+
+    public class Token
+    {
+        public TokenType Type;
+        public string Lexeme; // This should be used instead of Lexeme
+
+        public Token(TokenType type, string value)
         {
-            Bool,
-            True,
-            False,
-            String,
-            Int,
-            Char,
-            While,
-            New,
-
-            Fix,
-            Free,
-
-            QuotationMarks,
-
-            Number,
-            Subtract,
-            Negate,
-            Plus,
-            SemiColon,
-            Percentage,
-
-            Dot,
-            Comma,
-
-            ForwardSlash,
-            QuestionMark,
-
-            RoundBracketLeft,
-            RoundBracketRight,
-            BoxBracketLeft,
-            BoxBracketRight,
-            CurlyBracketLeft,
-            CurlyBracketRight,
-
-            LessThan,
-            GreaterThan,
-
-            Equals,
-            Variable,
-            DoubleEquals,
-            ArrowLeft,
-            NotEquals,
-            And,
-            Or,
-            Increment,
-            Decrement,
-            ArrowRight,
-        }
-
-        public class Token
-        {
-            public TokenType type;  
-            public string value;
-
-            public Token(TokenType type, string value)
-            {
-                this.type = type;
-                this.value = value;
-            }
+            Type = type;
+            Lexeme = value;
         }
     }
 }

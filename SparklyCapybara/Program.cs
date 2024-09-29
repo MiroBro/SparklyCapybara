@@ -1,20 +1,33 @@
-﻿using SparklyCapybara;
+﻿using SparklyCapybara.AbstarctSyntaxTree;
+using System;
+using System.Collections.Generic;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Display the number of command line arguments.
-        Console.WriteLine("Program Running");
+        // Example token list
+        var tokens = new List<TokenData.Token>
+        {
+            new TokenData.Token(TokenData.TokenType.Bool, "bool"),
+            new TokenData.Token(TokenData.TokenType.Variable, "myFunction"),
+            new TokenData.Token(TokenData.TokenType.RoundBracketLeft, "("),
+            new TokenData.Token(TokenData.TokenType.Variable, "param1"),
+            new TokenData.Token(TokenData.TokenType.RoundBracketRight, ")"),
+            new TokenData.Token(TokenData.TokenType.CurlyBracketLeft, "{"),
+            new TokenData.Token(TokenData.TokenType.Variable, "x"),
+            new TokenData.Token(TokenData.TokenType.CurlyBracketRight, "}"),
+            new TokenData.Token(TokenData.TokenType.EOF, "")
+        };
 
-        var tokenizer = new Tokenizer();
-        tokenizer.Tokenize();
+        // Parse tokens
+        var parser = new Parser(tokens);
+        var programNode = parser.Parse();
 
-        ProgramQuit();
-    }
+        // Create the evaluator
+        var evaluator = new ASTEvaluator();
 
-    private static void ProgramQuit()
-    {
-        Console.WriteLine("Program Quitting");
+        // Evaluate the program
+        programNode.Accept(evaluator);
     }
 }
